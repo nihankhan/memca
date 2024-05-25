@@ -1,0 +1,147 @@
+1. Install memcached:
+
+
+
+2. Verify the installation:
+
+	systemctl status memcached
+
+3. Configure Multiple Instances:
+
+	Configure Multiple Instances:
+
+4. Create Configuration Files:
+
+	Instances - 1:
+
+		sudo cp /etc/memcached.conf /etc/memcached_instances/memcached1.conf
+		sudo vi /etc/memcached_instances/memcached1.conf
+	Instances - 2:
+
+		sudo cp /etc/memcached.conf /etc/memcached_instances/memcached2.conf
+		sudo nano /etc/systemd/system/memcached2.service
+
+
+5. Create Systemd Service Files:
+
+Instance 1:
+	
+sudo nano /etc/systemd/system/memcached1.service
+
+[Unit]
+Description=Memcached caching daemon (Instance 1)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/memcached -u memcache -c 1024 -m 64 -p 11211 -d -P /var/run/memcached/memcached1.pid
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/var/run/memcached/memcached1.pid
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+Instance 2:
+
+sudo nano /etc/systemd/system/memcached2.service
+
+
+[Unit]
+Description=Memcached caching daemon (Instance 2)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/memcached -u memcache -c 1024 -m 64 -p 11212 -d -P /var/run/memcached/memcached2.pid
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/var/run/memcached/memcached2.pid
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+
+6. Reload Systemd and Start Instances:
+
+	sudo systemctl daemon-reload
+
+7. Start and enable each Memcached instance:
+
+	sudo systemctl start memcached1
+	sudo systemctl enable memcached1
+
+	sudo systemctl start memcached2
+	sudo systemctl enable memcached2
+
+
+
+8. Verify the Instances:
+
+	sudo systemctl status memcached1
+	sudo systemctl status memcached2
+
+
+9. Enjoy..............>
+
+
+
+
+
+
+
+memcache.service:
+
+sudo gedit /etc/systemd/system/memcached.service
+
+
+[Unit]
+Description=Memcached caching daemon (Mian Instance)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/memcached -u nihan -c 100 -m 64 -p 11211 -P /var/run/memcached/memcached.pid
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/var/run/memcached/memcached1.pid
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+memcache1.service:
+
+sudo gedit /etc/systemd/system/memcached1.service
+
+[Unit]
+Description=Memcached caching daemon (Instance 1)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/memcached -u nihan -c 100 -m 64 -p 11212 -P /var/run/memcached/memcached1.pid
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/var/run/memcached/memcached1.pid
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+memcache2.service:
+
+sudo gedit /etc/systemd/system/memcached2.service
+
+[Unit]
+Description=Memcached caching daemon (Instance 2)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/memcached -u nihan -c 100 -m 64 -p 11213 -P /var/run/memcached/memcached2.pid
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/var/run/memcached/memcached1.pid
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
